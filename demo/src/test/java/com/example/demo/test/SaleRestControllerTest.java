@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -134,7 +135,7 @@ public class SaleRestControllerTest {
 //        Mockito.when(saleService.createOneSale(any())
         String url = "/api/v1/sales";
 //        try {
-            this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(saleRequest))).andDo(print()).andExpect(status().isOk())
+            this.mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(saleRequest))).andDo(print()).andExpect(status().isOk());
 //                    .andExpect(result1 -> Assertions.assertEquals(null, result));
 //            int status = mvcResult.getResponse().getStatus();
 //            Assertions.assertEquals(200, status);
@@ -147,28 +148,69 @@ public class SaleRestControllerTest {
 
     }
 
-    //not found data
+
+
+    //badrequest
     @Test
-    public void saveSaleWithStatusWithRequiredBodyIsMissing() throws Exception {
-        Mockito.when(saleService.createOneSale(anyString(), anyInt(), anyString(), anyString())).thenReturn(sale);
-        List<String> headers = new ArrayList<>();
+    public void saveSaleWithStatusWithBadRequest() throws Exception {
+        //tạo dữ liệu request
+        SaleRequest saleRequest = new SaleRequest();
+        saleRequest.setClasses("tivi");
+        saleRequest.setCity("TP. HCM");
+        saleRequest.setMoney("1900000VND");
+//        Mockito.when(saleService.createOneSale(saleRequest.getClasses(), saleRequest.getMonth(), saleRequest.getCity(),saleRequest.getMoney())).thenReturn(sale);
         try {
-            headers = this.mockMvc.perform(post(url)
+            this.mockMvc.perform(post(url)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(null))
+                    .content(objectMapper.writeValueAsString(saleRequest))
             ).andDo(print())
-                    .andExpect(status().is5xxServerError())
-                    .andReturn().getResponse().getHeaders("log-detail-trace");
+                    .andExpect(status().isBadRequest());
         }catch (Exception ex) {
-            Assertions.assertEquals(ex.getLocalizedMessage(), headers.get(0));
+            ex.printStackTrace();
         }
 
     }
 
-    //bad request
-    public void saveSaleWithStatus400() {
+
+    @Test//(ok)
+    public void saveSaleWithStatusWithRequiredBodyIsMissing() throws Exception {
+        //tạo dữ liệu request
+        SaleRequest saleRequest = new SaleRequest();
+        saleRequest.setClasses("tivi");
+        saleRequest.setMonth(1);
+        saleRequest.setCity("TP. HCM");
+        saleRequest.setMoney("1900000VND");
+//        Mockito.when(saleService.createOneSale(anyString(), anyInt(), anyString(), anyString())).thenReturn(sale);
+//        List<String> headers = new ArrayList<>();
+        try {
+            this.mockMvc.perform(post(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(saleRequest))
+            ).andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andReturn().getResponse().getHeaders("log-detail-trace");
+        }catch (Exception ex) {
+           System.out.println(ex.getMessage());
+        }
 
     }
+//    //not found data
+//    @Test
+//    public void saveSaleWithNotFound() throws Exception {
+//        Mockito.when(saleService.createOneSale(anyString(), anyInt(), anyString(), anyString())).thenReturn(sale);
+//        List<String> headers = new ArrayList<>();
+//        try {
+//            headers = this.mockMvc.perform(post(url)
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .content(objectMapper.writeValueAsString(null))
+//            ).andDo(print())
+//                    .andExpect(status().is5xxServerError())
+//                    .andReturn().getResponse().getHeaders("log-detail-trace");
+//        }catch (Exception ex) {
+//            Assertions.assertEquals(ex.getLocalizedMessage(), headers.get(0));
+//        }
+//
+//    }
 
 
 }
